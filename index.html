@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Flint - Roblox Scripting Tool</title>
+  <meta name="description" content="Flint is fast, open-source and reliable Roblox scripting tool for creators and developers." />
+  <style>
+    :root{
+      --bg:#05070c;
+      --bg2:#07111f;
+      --card:#0a1324cc;
+      --card2:#0d1930cc;
+      --line:#1b2b4b;
+      --text:#eaf1ff;
+      --muted:#97a8c6;
+      --accent:#4ea1ff;
+      --accent2:#1d5eff;
+      --glow:rgba(78,161,255,.28);
+      --shadow:0 24px 80px rgba(0,0,0,.45);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1000px 600px at 80% 10%, rgba(29,94,255,.20), transparent 60%),
+        radial-gradient(900px 500px at 15% 20%, rgba(78,161,255,.12), transparent 55%),
+        linear-gradient(180deg, #04060a 0%, #07101e 100%);
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size:52px 52px;
+      mask-image:linear-gradient(180deg, rgba(0,0,0,.42), transparent 85%);
+      opacity:.22;
+    }
+
+    .wrap{
+      width:min(1180px, calc(100% - 32px));
+      margin:0 auto;
+      position:relative;
+      z-index:1;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:22px 0;
+      position:sticky;
+      top:0;
+      backdrop-filter: blur(14px);
+      background: linear-gradient(180deg, rgba(5,7,12,.88), rgba(5,7,12,.35));
+      border-bottom:1px solid rgba(255,255,255,.05);
+      z-index:5;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      text-decoration:none;
+      color:inherit;
+      font-weight:700;
+      letter-spacing:.3px;
+    }
+
+    .logo{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      background:
+        linear-gradient(135deg, rgba(78,161,255,1), rgba(29,94,255,1));
+      box-shadow:0 0 0 1px rgba(255,255,255,.08) inset, 0 18px 40px rgba(29,94,255,.28);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute;
+      inset:-30%;
+      background:linear-gradient(120deg, transparent 40%, rgba(255,255,255,.45), transparent 60%);
+      transform:rotate(18deg);
+      animation:shine 4.8s linear infinite;
+    }
+    @keyframes shine{
+      0%{transform:translateX(-80%) rotate(18deg)}
+      100%{transform:translateX(260%) rotate(18deg)}
+    }
+
+    nav a{
+      color:var(--muted);
+      text-decoration:none;
+      margin-left:18px;
+      font-size:14px;
+      transition:.2s ease;
+    }
+    nav a:hover{color:var(--text)}
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.35fr .95fr;
+      gap:28px;
+      align-items:center;
+      min-height: calc(100vh - 92px);
+      padding:34px 0 60px;
+    }
+
+    .kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid rgba(78,161,255,.22);
+      background:rgba(10,19,36,.62);
+      color:#b9d5ff;
+      border-radius:999px;
+      padding:10px 14px;
+      font-size:13px;
+      box-shadow:0 0 0 1px rgba(255,255,255,.03) inset;
+      backdrop-filter: blur(10px);
+    }
+    .dot{
+      width:9px;height:9px;border-radius:50%;
+      background:#3cf28d;
+      box-shadow:0 0 18px rgba(60,242,141,.65);
+    }
+
+    h1{
+      font-size: clamp(44px, 7vw, 78px);
+      line-height: .95;
+      margin:18px 0 16px;
+      letter-spacing:-.05em;
+      max-width: 11ch;
+    }
+    .lead{
+      max-width: 60ch;
+      color:var(--muted);
+      font-size:18px;
+      line-height:1.7;
+      margin:0 0 28px;
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      appearance:none;
+      border:none;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      border-radius:18px;
+      padding:16px 22px;
+      font-weight:700;
+      letter-spacing:.2px;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+      will-change: transform;
+    }
+    .btn:active{transform:translateY(1px) scale(.99)}
+    .btn-primary{
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color:white;
+      box-shadow: 0 20px 55px rgba(29,94,255,.30), 0 0 0 1px rgba(255,255,255,.08) inset;
+    }
+    .btn-primary:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 26px 70px rgba(29,94,255,.38), 0 0 0 1px rgba(255,255,255,.10) inset;
+    }
+    .btn-secondary{
+      background: rgba(10,19,36,.72);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .btn-secondary:hover{
+      transform: translateY(-2px);
+      border-color:rgba(78,161,255,.28);
+      box-shadow:0 16px 44px rgba(0,0,0,.24);
+    }
+
+    .hero-card{
+      position:relative;
+      padding:22px;
+      border-radius:28px;
+      background:
+        linear-gradient(180deg, rgba(13,25,48,.92), rgba(7,17,31,.82));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-height:560px;
+    }
+
+    .hero-card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(500px 220px at 80% 20%, rgba(78,161,255,.18), transparent 60%),
+        radial-gradient(400px 220px at 20% 80%, rgba(29,94,255,.16), transparent 60%);
+      pointer-events:none;
+    }
+
+    .download-panel{
+      position:absolute;
+      right:22px;
+      top:22px;
+      width:min(320px, calc(100% - 44px));
+      padding:20px;
+      border-radius:24px;
+      background:rgba(5,7,12,.45);
+      border:1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+      box-shadow:0 18px 40px rgba(0,0,0,.28);
+      z-index:2;
+    }
+    .download-panel h3{
+      margin:0 0 6px;
+      font-size:24px;
+      letter-spacing:-.03em;
+    }
+    .download-panel p{
+      margin:0 0 18px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+    }
+
+    .big-download{
+      width:100%;
+      min-height:72px;
+      border-radius:20px;
+      font-size:18px;
+      justify-content:center;
+      box-shadow:0 28px 60px rgba(29,94,255,.28), 0 0 0 1px rgba(255,255,255,.08) inset;
+    }
+
+    .mini{
+      display:flex;
+      gap:12px;
+      margin-top:14px;
+      color:var(--muted);
+      font-size:13px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      padding:9px 12px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.06);
+    }
+
+    .preview{
+      position:absolute;
+      left:22px;
+      right:22px;
+      bottom:22px;
+      top:170px;
+      border-radius:24px;
+      border:1px solid rgba(255,255,255,.07);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+        linear-gradient(180deg, #07101e, #0a1324);
+      overflow:hidden;
+      box-shadow:0 18px 45px rgba(0,0,0,.24);
+    }
+
+    .windowbar{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:rgba(255,255,255,.02);
+    }
+    .win{
+      width:10px;height:10px;border-radius:50%;
+      background:#2b3960;
+    }
+    .terminal{
+      padding:20px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color:#dcebff;
+      font-size:14px;
+      line-height:1.8;
+    }
+    .terminal .line{opacity:.82}
+    .terminal .accent{color:#6bb0ff}
+    .terminal .ok{color:#66f0a2}
+    .terminal .dim{color:#8190ac}
+
+    .floating{
+      position:absolute;
+      inset:auto auto 72px 28px;
+      width:190px;
+      padding:16px;
+      border-radius:18px;
+      background:rgba(7,17,31,.78);
+      border:1px solid rgba(78,161,255,.14);
+      box-shadow:0 16px 40px rgba(0,0,0,.25);
+      backdrop-filter: blur(12px);
+      animation:float 6s ease-in-out infinite;
+    }
+    .floating:nth-child(4){left:auto; right:28px; width:210px; animation-delay:-2s;}
+    @keyframes float{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-10px)}
+    }
+    .floating strong{display:block;font-size:15px;margin-bottom:6px}
+    .floating span{display:block;color:var(--muted);font-size:13px;line-height:1.5}
+
+    .section{
+      padding:22px 0 70px;
+    }
+
+    .section h2{
+      font-size: clamp(28px, 4vw, 44px);
+      margin:0 0 14px;
+      letter-spacing:-.04em;
+    }
+    .section p.sub{
+      color:var(--muted);
+      margin:0 0 24px;
+      max-width:68ch;
+      line-height:1.7;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:18px;
+    }
+    .feature{
+      padding:22px;
+      border-radius:24px;
+      background:linear-gradient(180deg, rgba(10,19,36,.92), rgba(8,15,28,.88));
+      border:1px solid rgba(255,255,255,.07);
+      box-shadow: 0 14px 40px rgba(0,0,0,.18);
+      transition: transform .18s ease, border-color .18s ease;
+    }
+    .feature:hover{
+      transform:translateY(-4px);
+      border-color:rgba(78,161,255,.18);
+    }
+    .feature .icon{
+      width:46px;height:46px;border-radius:16px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg, rgba(78,161,255,.18), rgba(29,94,255,.18));
+      border:1px solid rgba(78,161,255,.15);
+      margin-bottom:14px;
+      font-size:20px;
+    }
+    .feature h3{margin:0 0 8px;font-size:20px}
+    .feature p{margin:0;color:var(--muted);line-height:1.7}
+
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:14px;
+      margin-top:18px;
+    }
+    .stat{
+      padding:18px 18px 16px;
+      border-radius:20px;
+      background:rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .stat strong{
+      display:block;
+      font-size:28px;
+      letter-spacing:-.05em;
+      margin-bottom:5px;
+    }
+    .stat span{color:var(--muted);font-size:13px}
+
+    .bottom-cta{
+      margin:40px 0 0;
+      padding:28px;
+      border-radius:28px;
+      background:
+        radial-gradient(700px 260px at 20% 20%, rgba(78,161,255,.18), transparent 60%),
+        linear-gradient(180deg, rgba(13,25,48,.9), rgba(7,17,31,.92));
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:var(--shadow);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:20px;
+      flex-wrap:wrap;
+    }
+    .bottom-cta h3{margin:0 0 8px;font-size:28px;letter-spacing:-.03em}
+    .bottom-cta p{margin:0;color:var(--muted);line-height:1.6;max-width:60ch}
+
+    footer{
+      padding:24px 0 40px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+    }
+
+    @media (max-width: 960px){
+      header{position:static}
+      .hero{grid-template-columns:1fr; min-height:auto; padding-top:18px}
+      .hero-card{min-height:640px}
+      .download-panel{position:relative; inset:auto; width:100%; margin-bottom:18px}
+      .preview{position:relative; inset:auto; min-height:400px}
+      .floating{display:none}
+      .grid,.stats{grid-template-columns:1fr 1fr}
+    }
+
+    @media (max-width: 640px){
+      .wrap{width:min(100% - 22px, 1180px)}
+      nav{display:none}
+      h1{max-width:none}
+      .lead{font-size:16px}
+      .grid,.stats{grid-template-columns:1fr}
+      .hero-card{padding:14px}
+      .download-panel{padding:18px}
+      .big-download{min-height:64px;font-size:16px}
+      .preview{min-height:360px}
+      .bottom-cta{padding:22px}
+    }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <a class="brand" href="#top">
+      <div class="logo"></div>
+      <div>
+        Flint
+        <div style="font-size:12px;color:var(--muted);font-weight:500;margin-top:2px;">Roblox Developer Tool</div>
+      </div>
+    </a>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#reliable">Reliable</a>
+      <a href="placeholder">Download</a>
+    </nav>
+  </header>
+
+  <main class="wrap" id="top">
+    <section class="hero">
+      <div>
+        <div class="kicker"><span class="dot"></span> Open-source · Fast · Built for creators</div>
+        <h1>Best Roblox Developer Utility</h1>
+        <p class="lead">
+          Flint is elegant scripting utility for Roblox scripting workflow.
+          Clean UI, low cortisol, stable performace and adesign, that feels profesional.
+        </p>
+
+        <div class="actions">
+          <a class="btn btn-primary" href="placeholder">Download for PC</a>
+          <a class="btn btn-secondary" href="#features">Explore features</a>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <strong>Fast</strong>
+            <span>Minimal loading, smooth UI</span>
+          </div>
+          <div class="stat">
+            <strong>Open</strong>
+            <span>Transparent source-first approach</span>
+          </div>
+          <div class="stat">
+            <strong>Stable</strong>
+            <span>Focused on reliability</span>
+          </div>
+          <div class="stat">
+            <strong>Clean</strong>
+            <span>Simple setup, polished look</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-card">
+        <div class="download-panel" id="download">
+          <h3>Download Flint</h3>
+          <p>For free, full version. Flint is open-source!</p>
+          <a class="btn btn-primary big-download" href="placeholder">
+            Download now
+          </a>
+          <div class="mini">
+            <span class="pill">Windows</span>
+            <span class="pill">Source available</span>
+            <span class="pill">Safe installer</span>
+          </div>
+        </div>
+
+        <div class="preview">
+          <div class="windowbar">
+            <span class="win"></span><span class="win"></span><span class="win"></span>
+          </div>
+          <div class="terminal">
+            <div class="line"><span class="dim">[</span><span class="ok">ready</span><span class="dim">]</span> Flint initialized</div>
+            <div class="line"><span class="dim">[</span><span class="ok">info</span><span class="dim">]</span> Lightweight runtime loaded</div>
+            <div class="line"><span class="dim">[</span><span class="accent">sync</span><span class="dim">]</span> Plugins discovered: 12</div>
+            <div class="line"><span class="dim">[</span><span class="ok">ok</span><span class="dim">]</span> Ready for scripting workflow</div>
+            <div style="height:18px"></div>
+            <div class="line"><span class="dim">&gt;</span> Fast startup</div>
+            <div class="line"><span class="dim">&gt;</span> Clean interface</div>
+            <div class="line"><span class="dim">&gt;</span> Reliable performance</div>
+          </div>
+        </div>
+
+        <div class="floating" style="bottom: 250px;">
+          <strong>Open-source</strong>
+          <span>Transparent project structure and easy-to-review codebase.</span>
+        </div>
+        <div class="floating" style="bottom: 92px;">
+          <strong>Reliable</strong>
+          <span>Built to feel stable, responsive, and production-ready.</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <h2>Features</h2>
+      <p class="sub">
+        Stable, clean looking UI and working. Gets the job done 100,000 times better than
+        other developer scripting utility tools.
+      </p>
+
+      <div class="grid">
+        <div class="feature">
+          <div class="icon">⚡</div>
+          <h3>Performance</h3>
+          <p>Near 0ms start up time, stable and fast even for potato computers.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🛡</div>
+          <h3>Professinal use</h3>
+          <p>Profesional layout, clear CTA, production ready. Free for commercial use.</p>
+        </div>
+        <div class="feature">
+          <div class="icon">🧩</div>
+          <h3>Open-source</h3>
+          <p>First ever open-source Roblox Developer Utility.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reliable">
+      <div class="bottom-cta">
+        <div>
+          <h3>Built for everyone</h3>
+          <p>
+            Flint is made to be available for everyone, with accesibility
+            tools, and high contrast. Get it now! It's free!
+          </p>
+        </div>
+        <a class="btn btn-primary" href="placeholder">Download Flint</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    © 2026 Flint. Developer Scripting Utility.
+  </footer>
+</body>
+</html>
